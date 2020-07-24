@@ -1,0 +1,78 @@
+package com.lal.blog_demo.service;
+
+import com.lal.blog_demo.dao.BlogRepository;
+import com.lal.blog_demo.dao.TypeRepository;
+import com.lal.blog_demo.po.Type;
+import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.Resource;
+import javax.transaction.Transactional;
+import java.util.List;
+
+@Service
+public class TypeServiceImpl implements TypeService {
+    @Resource
+    private TypeRepository typeRepository;
+    @Transactional//添加到事务管理
+    @Override
+    public Type saveType(Type type) {
+
+        return typeRepository.save(type);
+    }
+
+    @Transactional
+    @Override
+    public Type getType(Long id) {
+        return typeRepository.getOne(id);
+    }
+
+    @Override
+    public Type getTypeByName(String name) {
+        return typeRepository.findByName(name);
+    }
+
+    @Transactional
+    @Override
+    public Page<Type> listType(Pageable pageable) {
+        return typeRepository.findAll(pageable);
+    }
+
+    @Override
+    public List<Type> listType() {
+        return typeRepository.findAll();
+    }
+
+    @Override
+    public List<Type> listTypeTop(Integer size) {
+        Sort sort=Sort.by(Sort.Direction.DESC,"blogs.size");
+        Pageable pageable=PageRequest.of(0,size,sort);
+        return typeRepository.findTop(pageable);
+    }
+
+    @Transactional
+    @Override
+    public Type updateType(Long id, Type type) {
+        Type t = typeRepository.getOne(id);
+        if (t == null) {
+            throw new com.lal.blog.NotFoundException("不存在该类型");
+        }
+        BeanUtils.copyProperties(type, t);
+        return typeRepository.save(t);
+    }
+
+    @Transactional
+    @Override
+    public void deleteType(Long id) {
+        Type t = typeRepository.getOne(id);
+        if (t == null) {
+            throw new com.lal.blog.NotFoundException("不存在该类型");
+        } else {
+            typeRepository.deleteById(id);
+        }
+    }
+}
